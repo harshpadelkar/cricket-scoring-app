@@ -11,8 +11,52 @@ datasource db {
 }
 
 model User {
-  id       Int    @id @default(autoincrement())
-  email    String @unique
-  name     String
-  password String
+  id          String       @id @default(uuid())
+  username    String       @unique
+  email       String       @unique
+  password    String
+  firstName   String
+  lastName    String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  tournaments Tournament[]
+}
+
+model Tournament {
+  id      String  @id @default(uuid())
+  name    String
+  season  Int?    @default(1)
+  orgName String?
+  teams   Team[]
+  userId  String
+  user    User    @relation(fields: [userId], references: [id])
+}
+
+model Team {
+  id            String     @id @default(uuid())
+  name          String
+  tournamentId  String
+  captainId     String     @unique
+  viceCaptainId String     @unique
+  tournament    Tournament @relation(fields: [tournamentId], references: [id])
+  captain       Player     @relation("Captain", fields: [captainId], references: [id])
+  viceCaptain   Player     @relation("ViceCaptain", fields: [viceCaptainId], references: [id])
+  players       Player[]
+}
+
+model Player {
+  id                String     @id @default(uuid())
+  name              String
+  role              PlayerRole
+  teamId            String
+  team              Team       @relation(fields: [teamId], references: [id])
+  captainOfTeam     Team?      @relation("Captain")
+  viceCaptainOfTeam Team?      @relation("ViceCaptain")
+}
+
+enum PlayerRole {
+  BATSMAN
+  BOWLER
+  ALL_ROUNDER
+  WICKETKEEPER
 }
